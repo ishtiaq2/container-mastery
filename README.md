@@ -18,7 +18,7 @@ covering **Dockerfile** and **docker-compose** fundamentals through a real multi
 
 * LDAP
 
-*Vue
+* Vue
 
 * Inter container Communication Protocol: http/https, ssh, snmp, gPRPC, JDBC, MQTT/AMQP. 
 
