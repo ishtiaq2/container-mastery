@@ -32,14 +32,11 @@ A **container** packages an application with everything it needs to run as one i
 virtual machine: there's no separate guest kernel. A container is a normal process on
 the host, made to *look* isolated using two Linux kernel features:
 
-- **Namespaces** limit and account for the resources (CPU, memory) that
- process is allowed to consume.
-
 - **Namespaces** give the process its own private view of things: its own filesystem root, its own network interfaces, its own process-ID numbering (so the container's main process can appear as PID 1 inside the container while being an ordinary PID on the host).
 - **Cgroups** (control groups) — limit and account for the resources (CPU, memory) that process is allowed to consume.
 
-A **Dockerfile** (or `Containerfile` a read-only, layered snapshot everything
-needed to run the app. A **container** is a running instance of that image.
+A **Dockerfile** (or Containerfile — Podman's preferred name for the identical format) is a text recipe: a sequence of instructions (FROM, RUN, COPY, EXPOSE, CMD) that gets built, top to bottom, into an image — a read-only, layered snapshot everything needed to run the app. A container is a running instance of that image.
+
 
 **Compose** (Docker Compose, or `podman-compose`) takes this one level up: instead of
 typing out long `run` commands for each piece of a multi-container application, you
