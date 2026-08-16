@@ -32,11 +32,11 @@ A **container** packages an application with everything it needs to run as one i
 virtual machine: there's no separate guest kernel. A container is a normal process on
 the host, made to *look* isolated using two Linux kernel features:
 
-- **Namespaces** give the process its own private view of things: its own filesystem root, its own network interfaces, its own process-ID numbering (so the container's main process can appear as PID 1 inside the container while being an ordinary PID on the host).
-- **Cgroups** (control groups) — limit and account for the resources (CPU, memory) that process is allowed to consume.
+- **Namespaces** limit and account for the resources (CPU, memory) that
+ process is allowed to consume.
 
-A **Dockerfile** (or Containerfile — Podman's preferred name for the identical format) is a text recipe: a sequence of instructions (FROM, RUN, COPY, EXPOSE, CMD) that gets built, top to bottom, into an image — a read-only, layered snapshot everything needed to run the app. A container is a running instance of that image.
-
+A **Dockerfile** (or `Containerfile` a read-only, layered snapshot everything
+needed to run the app. A **container** is a running instance of that image.
 
 **Compose** (Docker Compose, or `podman-compose`) takes this one level up: instead of
 typing out long `run` commands for each piece of a multi-container application, you
@@ -276,6 +276,24 @@ if __name__ == "__main__":
 
 ### Step 5 this is the
 `podman-compose` promise from Section 2: same YAML, no daemon.
+
+> **A real gotcha worth knowing before you rely on this:** `depends_on: condition:
+> service_healthy` is a Docker Compose v2 feature, and support for it in
+> `podman-compose` has historically been inconsistent depending on which version you
+> have installed add
+> an explicit wait step before moving on, either as a one-off command or wired into the
+> OpenNMS container's entrypoint. A simple, dependency-free version you can run by hand:
+> ```bash
+> until podman exec database pg_isready -U postgres; do
+>   echo "waiting for database..."
+>   sleep 2
+> done
+> echo "database is ready"
+> ```
+> Run that between `podman-compose up -d database` and starting the `opennms` service if
+> you're bringing the stack up piecemeal, or simply treat the `healthcheck:` blocks as
+> documentation of *intent* and manually confirm readiness (Section 11, Step 1's log-tail
+> approach) rather than assuming compose enforced the ordering for you.
 
 ---
 
