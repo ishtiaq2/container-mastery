@@ -35,6 +35,9 @@ the host, made to *look* isolated using two Linux kernel features:
 - **Namespaces** limit and account for the resources (CPU, memory) that
  process is allowed to consume.
 
+- **Namespaces** give the process its own private view of things: its own filesystem root, its own network interfaces, its own process-ID numbering (so the container's main process can appear as PID 1 inside the container while being an ordinary PID on the host).
+- **Cgroups** (control groups) — limit and account for the resources (CPU, memory) that process is allowed to consume.
+
 A **Dockerfile** (or `Containerfile` a read-only, layered snapshot everything
 needed to run the app. A **container** is a running instance of that image.
 
