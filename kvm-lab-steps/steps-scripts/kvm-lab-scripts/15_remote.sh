@@ -65,11 +65,12 @@ EOF
   ;;
 
 confirm)
+  if [ -z "$(ip -4 -o addr show "$LAB_BRIDGE" 2>/dev/null)" ]; then echo "$LAB_BRIDGE has no IP: do not confirm, let the timer undo it"; exit 1; fi
   ip -4 -br addr show "$LAB_BRIDGE"
   bridge link
-  ping -c 2 1.1.1.1
-  sudo systemctl stop kvm-lab-netrevert.timer
+  sudo systemctl stop kvm-lab-netrevert.timer 2>/dev/null || true
   echo "Automatic undo cancelled."
+  ping -c 2 1.1.1.1 || echo "ping failed (ICMP may be blocked): check a web page works"
   if ! virsh net-info lab-bridge >/dev/null 2>&1; then
     cat > "$LAB_HOME/lab-bridge.xml" <<EOF
 <network><name>lab-bridge</name><forward mode='bridge'/><bridge name='$LAB_BRIDGE'/></network>

@@ -8,7 +8,7 @@ PID=$(sudo cat "/run/libvirt/qemu/$VM.pid")
 
 echo "== 1. The whole VM is one process. Expected: user libvirt-qemu (not root), command qemu-system-x86"
 ps -o pid,user,%cpu,%mem,rss,etime,comm -p "$PID"
-ps -Z -p "$PID" -o label= || true                   # its own AppArmor/SELinux profile
+ps -o label= -p "$PID" || true                      # its own AppArmor/SELinux profile
 
 echo "== 2. Each virtual CPU is a thread. Expected: 'CPU 0/KVM', 'CPU 1/KVM'"
 ps -T -p "$PID" -o spid,comm,psr,%cpu | grep -E 'SPID|CPU'

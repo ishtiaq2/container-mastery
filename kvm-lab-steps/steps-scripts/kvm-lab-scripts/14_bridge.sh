@@ -22,6 +22,7 @@ move_vm() {   # move_vm VM NETWORK
 
 case "${1:-}" in
 on)
+  if ! command -v nmcli >/dev/null; then echo "No NetworkManager here (netplan/networkd server): use ./15_remote.sh bridge instead."; exit 1; fi
   NIC=$(ip route show default | awk '{print $5; exit}')
   echo "== Look first: card $NIC"
   if [ -d "/sys/class/net/$NIC/wireless" ]; then echo "$NIC is Wi-Fi: bridging is not possible. Use NAT."; exit 1; fi
@@ -56,7 +57,9 @@ on)
   fi
   ip -4 -br addr show "$LAB_BRIDGE"                 # Expected: your IP, now on br-lab
   bridge link                                       # Expected: NIC ... master br-lab
-  ping -c 2 1.1.1.1
+  ping -c 2 1.1.1.1 || echo "ping failed (ICMP may be blocked on your network): check a web page works"
+  echo "If Docker runs on THIS host, allow bridged traffic or VMs get no IP:"
+  echo "  sudo iptables -I DOCKER-USER -i $LAB_BRIDGE -o $LAB_BRIDGE -j ACCEPT"
 
   echo "== Tell libvirt about the bridge (network lab-bridge, no DHCP of its own)"
   cat > "$LAB_HOME/lab-bridge.xml" <<EOF
@@ -87,8 +90,8 @@ off)
   virsh net-destroy lab-bridge 2>/dev/null || true
   virsh net-undefine lab-bridge 2>/dev/null || true
   sudo nmcli con delete "$LAB_BRIDGE-port" "$LAB_BRIDGE" 2>/dev/null || true
-  sudo nmcli con up "$(cat "$S/bridge-orig-con")"
-  ip -4 -br addr show "$(cat "$S/bridge-iface")"    # Expected: your IP is back on the card
+  if [ -f "$S/bridge-orig-con" ]; then sudo nmcli con up "$(cat "$S/bridge-orig-con")"; fi
+  ip -4 -br addr show                                # Expected: your IP is back on the card
   rm -f "$S/bridge-iface" "$S/bridge-orig-con"
   ;;
 

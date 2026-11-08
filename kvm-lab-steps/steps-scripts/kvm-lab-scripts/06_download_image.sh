@@ -16,10 +16,12 @@ case "$NAME" in
 esac
 IMG_FILE="${IMG_URL##*/}"
 
-echo "== Does virt-install know $OS_VARIANT? (0 = no, then linux2022 is used)"
-known=$(virt-install --osinfo list | grep -cw "$OS_VARIANT" || true)
-echo "$known"
-if [ "$known" = 0 ]; then OS_VARIANT=linux2022; fi
+echo "== Does virt-install know $OS_VARIANT? (if not: linux2022, else let virt-install guess)"
+OS_LIST=$(virt-install --osinfo list)
+if ! echo "$OS_LIST" | grep -qw "$OS_VARIANT"; then
+  if echo "$OS_LIST" | grep -qw linux2022; then OS_VARIANT=linux2022; else OS_VARIANT="detect=on,require=off"; fi
+fi
+echo "using: $OS_VARIANT"
 
 echo "== Download $IMG_FILE"
 if sudo test -f "$LAB_BASE_DIR/$IMG_FILE"; then

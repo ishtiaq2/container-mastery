@@ -49,6 +49,10 @@ echo "== Let short image names like 'postgres:15' resolve to Docker Hub"
 mkdir -p ~/.config/containers
 printf 'unqualified-search-registries = ["docker.io"]\nshort-name-mode = "permissive"\n' > ~/.config/containers/registries.conf
 
+echo "== Rootless Podman needs sub-UIDs for your user (e.g. PostgreSQL runs as UID 999 in its container)"
+grep "^$USER:" /etc/subuid /etc/subgid || sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$USER"
+podman system migrate
+
 echo "== Keep your containers running after you log out (rootless Podman runs under your user)"
 sudo loginctl enable-linger "$USER"
 
